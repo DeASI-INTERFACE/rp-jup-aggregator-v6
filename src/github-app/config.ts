@@ -6,6 +6,7 @@ export function loadSyncConfig(): SyncConfig {
   if (!trackerUrl) throw new Error('[github-app] Missing required env: EXTERNAL_TRACKER_URL');
   if (!trackerToken) throw new Error('[github-app] Missing required env: EXTERNAL_TRACKER_TOKEN');
   return {
+    trackerUrl, trackerToken,
     trackerUrl,
     trackerToken,
     timeoutMs: Number(process.env.TRACKER_TIMEOUT_MS ?? 10_000),

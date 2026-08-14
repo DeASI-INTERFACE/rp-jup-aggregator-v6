@@ -9,6 +9,12 @@ export default (app: Probot) => {
   app.on('issues.opened', async (context) => {
     const issue = context.payload.issue;
     const repo = context.payload.repository;
+    const key = buildDedupeKey((context as any).id ?? issue.node_id);
+    if (!claimDelivery(key)) { context.log.info({ key }, 'Duplicate delivery ignored'); return; }
+    const payload: ExternalIssuePayload = {
+      title: issue.title, body: issue.body ?? '',
+      githubUrl: issue.html_url, issueNumber: issue.number,
+      repoFullName: repo.full_name, deliveryKey: key,
     const rawId = (context as unknown as { id?: string }).id ?? issue.node_id;
     const key = buildDedupeKey(rawId);
     if (!claimDelivery(key)) {
@@ -26,6 +32,10 @@ export default (app: Probot) => {
     try {
       await syncIssueToTracker(payload, config);
       finaliseDelivery(key, 'completed');
+      context.log.info({ key, issueNumber: issue.number }, 'Issue synced');
+    } catch (error) {
+      finaliseDelivery(key, 'failed');
+      context.log.error({ key, error }, 'Issue sync failed');
       context.log.info({ key, issueNumber: issue.number }, 'Issue synced to external tracker');
     } catch (error) {
       finaliseDelivery(key, 'failed');

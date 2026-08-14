@@ -6,6 +6,7 @@ export type ExternalIssuePayload = {
   repoFullName: string;
   deliveryKey: string;
 };
+export type DeliveryStatus = 'pending' | 'completed' | 'failed';
 
 export type DeliveryStatus = 'pending' | 'completed' | 'failed';
 
